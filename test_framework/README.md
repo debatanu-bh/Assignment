@@ -1,4 +1,3 @@
-Test Automation High-Level Design
 # 1. High-Level Design
 
 ### 1.1 Layered Architecture
@@ -33,12 +32,20 @@ Tests  →  Services  →  Clients  →  REST APIs (Cloud / Device)
 
 **d) Configuration externalized to `.env`**
 - URLs, credentials, timeouts all come from `.env` (never hardcoded).
-- Same codebase runs against different environments by swapping the `.env` file.
-- CI/CD injects values via environment variables.
+- Same codebase runs against different environments by swapping the `.env` file loaded by python-dotenv
+- This allows the same code to run in different environments (CI/CD nightly,local dev) by simply swapping the .env file.
 
 **e) Retry with exponential backoff**
 - Every HTTP call is wrapped with `@retry(max_attempts=3, backoff=2)`.
 - This handles transient network issues — critical for IoT devices on potentially unreliable networks.
+- Network calls are wrapped with a @retry decorator (utils/retry_decorator.py)to handle transient failures — critical for IoT devices on unreliable networks.
+
+**f) Mocked Unit Tests + Real Integration Tests **
+     - Default test run: all API calls are mocked (pytest-mock) so tests are fast, deterministic, and runnable without hardware.
+     - CI/CD nightly run: tests marked @pytest.mark.real can be executed with --real flag against the actual device (192.168.0.2) and cloud(https://automation.ienso.com) after firmware/cloud deployment.
+
+**g) Allure Reporting **
+     - pytest --alluredir=allure-results generates reports for the nightly CI/CD pipeline.
 
 ### 1.3 Two Test Modes
 
@@ -71,21 +78,7 @@ This is the architecture of the framework
 
 KEY DESIGN DECISIONS
 ===============================================================================
-  1) Configuration via .env
-     - All environment-specific values (URLs, credentials, timeouts) live in a .env file, loaded by python-dotenv.
-     - .env.example is committed as a template; .env is gitignored.
-     - This allows the same code to run in different environments (CI/CD nightly,local dev) by simply swapping the .env file.
-
-  2) Retry with Exponential Backoff
-     - Network calls are wrapped with a @retry decorator (utils/retry_decorator.py)to handle transient failures — critical for IoT devices on unreliable networks.
-
-  3) Mocked Unit Tests + Real Integration Tests
-     - Default test run: all API calls are mocked (pytest-mock) so tests are fast, deterministic, and runnable without hardware.
-     - CI/CD nightly run: tests marked @pytest.mark.real can be executed with --real flag against the actual device (192.168.0.2) and cloud(https://automation.ienso.com) after firmware/cloud deployment.
-
-  4) Allure Reporting
-     - pytest --alluredir=allure-results generates rich reports for the nightly
-       CI/CD pipeline.
+  
 
  CONSIDERATIONS & POTENTIAL PITFALLS
 ================================================================================
@@ -113,7 +106,7 @@ KEY DESIGN DECISIONS
      - Credentials must never be committed to version control.
      - Mitigation: .env is gitignored; CI/CD injects secrets via environment variables.
      
-.  TEST CASES (10 total)
+.  TEST CASES 
 ================================================================================
 
   Cloud API — Set Device Name (POST /api/device/name)
