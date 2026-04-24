@@ -16,12 +16,12 @@ Tests  →  Services  →  Clients  →  REST APIs (Cloud / Device)
 | **Client** | `CloudAPIClient`, `DeviceAPIClient` | Raw HTTP calls to specific endpoints |
 | **Infrastructure** | `BaseAPIClient`, `retry_decorator`, `settings` | Retry logic, config, logging |
 
-**Why layers?** A test never constructs a URL or manages a token directly. If an API endpoint changes, only the client layer changes — tests don't need updating.
+**Reason For Layered Architecture** A test never constructs a URL or manages a token directly. If an API endpoint changes only the client layer changes — tests don't need updating.
 
 ### 1.2 Key Design Decisions
 
 **a) Two separate clients, one base class**
-- The cloud and device have different base URLs and different APIs, so they get separate clients.
+- The cloud and device have different base URLs and different APIs so they get separate clients.
 - Common behavior (headers, retry, timeout) lives in `BaseAPIClient` using the **Template Method** pattern — subclasses only override `get_base_url()`.
 
 **b) AuthService as a Singleton with token caching**
@@ -47,7 +47,7 @@ Tests  →  Services  →  Clients  →  REST APIs (Cloud / Device)
 | **Mocked** (default) | `pytest tests/` | All HTTP calls mocked via `pytest-mock`. Fast, deterministic, no hardware needed. |
 | **Real** (CI/CD nightly) | `pytest tests/ --real` | Tests marked `@pytest.mark.real` hit the actual cloud + device. |
 
-Developers can run the full suite locally in <1 second, while the nightly CI/CD validates against real hardware.
+locally the tests can be run in <1 second, while the nightly CI/CD validates against real hardware.
 
 ### 1.4 CI/CD Integration
 
@@ -118,21 +118,25 @@ KEY DESIGN DECISIONS
 
   Cloud API — Set Device Name (POST /api/device/name)
   ───────────────────────────────────────────────────
-  TC_CLOUD_01  Set valid name        → 200, device reports new name
-  TC_CLOUD_02  Empty string          → Validation error (rejected)
-  TC_CLOUD_03  100-char name (max)   → 200, accepted
-  TC_CLOUD_04  101-char name         → Validation error (rejected)
-  TC_CLOUD_05  Special / Unicode     → 200, name preserved exactly
-  TC_CLOUD_06  Invalid/expired token → 401 UNAUTHORIZED
-  TC_CLOUD_07  Whitespace-only name  → Validation error (rejected)
+ | Test case | Tests | Expected Output |
+|-----------|-------|------------------|
+| **TC_CLOUD_01** | Set valid name | `200 OK` — device reports new name |
+| **TC_CLOUD_02** | Empty string | `400 Bad Request` — Validation error (rejected) |
+| **TC_CLOUD_03** | 100-char name (max) | `200 OK` — accepted |
+| **TC_CLOUD_04** | 101-char name | `400 Bad Request` — Validation error (rejected) |
+| **TC_CLOUD_05** | Special / Unicode | `200 OK` — name preserved exactly |
+| **TC_CLOUD_06** | Invalid/expired token | `401 UNAUTHORIZED` |
+| **TC_CLOUD_07** | Whitespace-only name | `400 Bad Request` — Validation error (rejected) |
 
   Device API — Get Device Name (GET /api/device/name)
   ───────────────────────────────────────────────────
-  TC_DEVICE_01  Get name after cloud change  → Returns updated name
-  TC_DEVICE_02  Get default name             → Non-empty string
-  TC_DEVICE_03  Invalid token                → 401 UNAUTHORIZED
-  TC_DEVICE_04  Name persists after reboot   → Same name returned
-  TC_DEVICE_05  Concurrent reads             → All return same name
+  | Test case | Tests | Expected Output | Notes |
+|-----------|-------|-----------------|-------|
+| **TC_DEVICE_01** | Get name after cloud change | `200 OK` — Returns updated name | Verifies cloud → device sync |
+| **TC_DEVICE_02** | Get default name | `200 OK` — Non-empty string | Factory default / first boot |
+| **TC_DEVICE_03** | Invalid token | `401 UNAUTHORIZED` | Rejects unauthenticated requests |
+| **TC_DEVICE_04** | Name persists after reboot | `200 OK` — Same name returned | Stored in non-volatile memory |
+| **TC_DEVICE_05** | Concurrent reads | `200 OK` — All return same name | Thread-safe / race-condition free |
      
   HOW TO RUN
 ================================================================================
