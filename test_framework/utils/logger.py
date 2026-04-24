@@ -3,7 +3,6 @@ import sys
 
 
 def setup_logger(name: str = "iENSO_Test", level: str = "INFO") -> logging.Logger:
-    """Setup logger with consistent formatting"""
     logger = logging.getLogger(name)
     logger.setLevel(level)
     

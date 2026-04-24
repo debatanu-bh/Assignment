@@ -133,11 +133,15 @@ BLOCK DIAGRAM OF THE AUTOMATION
 | **TC_DEVICE_03** | Invalid token | `401 UNAUTHORIZED` | Rejects unauthenticated requests |
 | **TC_DEVICE_04** | Name persists after reboot | `200 OK` — Same name returned | Stored in non-volatile memory |
 | **TC_DEVICE_05** | Concurrent reads | `200 OK` — All return same name | Thread-safe / race-condition free |
-     
+    
+--- 
   HOW TO RUN
 ================================================================================
   # Setup
+  After cloning the repo cd to test_framework 
   cp .env.example .env          # edit with real credentials
+  python3 -m .venv venv		# if you want to run in virtual mode
+  source .venv/bin/activate     # activate the virtual  environment
   pip install -r requirements.txt
 
   # Run with mocks (no hardware needed)
@@ -150,3 +154,5 @@ BLOCK DIAGRAM OF THE AUTOMATION
   allure serve allure-results 
         or
   npx allure serve allure-results
+  
+  ---

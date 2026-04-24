@@ -7,7 +7,6 @@ from utils.logger import setup_logger
 
 
 class BaseAPIClient(ABC):
-    """Base client following Template Method pattern for API interactions"""
     
     def __init__(self):
         self.session = requests.Session()
@@ -16,11 +15,9 @@ class BaseAPIClient(ABC):
         
     @abstractmethod
     def get_base_url(self) -> str:
-        """Abstract method to be implemented by subclasses"""
         pass
     
     def _build_headers(self, token: Optional[str] = None) -> Dict[str, str]:
-        """Build standard headers with optional authorization"""
         headers = {"Content-Type": "application/json"}
         if token:
             headers["Authorization"] = f"Bearer {token}"
@@ -28,7 +25,6 @@ class BaseAPIClient(ABC):
     
     @retry(max_attempts=config.RETRY_COUNT, delay=config.RETRY_DELAY)
     def post(self, endpoint: str, data: Dict[str, Any], token: Optional[str] = None) -> Dict[str, Any]:
-        """Perform POST request with retry logic"""
         url = f"{self.get_base_url()}/{endpoint.lstrip('/')}"
         headers = self._build_headers(token)
         self.logger.debug(f"POST {url} - Data: {data}")
@@ -39,7 +35,6 @@ class BaseAPIClient(ABC):
     
     @retry(max_attempts=config.RETRY_COUNT, delay=config.RETRY_DELAY)
     def get(self, endpoint: str, token: Optional[str] = None) -> Dict[str, Any]:
-        """Perform GET request with retry logic"""
         url = f"{self.get_base_url()}/{endpoint.lstrip('/')}"
         headers = self._build_headers(token)
         

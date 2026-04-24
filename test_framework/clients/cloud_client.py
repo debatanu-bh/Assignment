@@ -4,24 +4,13 @@ from settings import config
 
 
 class CloudAPIClient(BaseAPIClient):
-    """
-    Cloud API Client following Service Object Pattern.
-    Handles all cloud-related API interactions.
+    """Client for the cloud REST API (login, device management, etc.)"""
 
-    Cloud REST API (per spec):
-      - POST /api/auth/login          -> {"access_token": "..."}
-      - POST /api/device/name         -> sets device name
-    """
 
     def get_base_url(self) -> str:
         return config.CLOUD_BASE_URL
 
     def login(self, username: str, password: str) -> str:
-        """
-        Authenticate with cloud service.
-        POST /api/auth/login
-        Returns access token.
-        """
         endpoint = "/api/auth/login"
         data = {"username": username, "password": password}
 
@@ -29,10 +18,6 @@ class CloudAPIClient(BaseAPIClient):
         return response.get("access_token")
 
     def set_device_name(self, token: str, new_name: str) -> Dict[str, Any]:
-        """
-        Set device name via cloud API.
-        POST /api/device/name
-        """
         endpoint = "/api/device/name"
         data = {"name": new_name}
 

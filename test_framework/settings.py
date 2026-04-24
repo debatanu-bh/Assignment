@@ -15,7 +15,6 @@ load_dotenv(_env_path)
 
 
 class Config:
-    """Central configuration management following Singleton pattern"""
     
     # Cloud configuration
     CLOUD_BASE_URL = os.getenv("CLOUD_BASE_URL")

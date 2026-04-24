@@ -7,10 +7,6 @@ logger = logging.getLogger(__name__)
 
 
 def retry(max_attempts=3, delay=1, backoff=2, exceptions=(RequestException,)):
-    """
-    Retry decorator for flaky network calls.
-    Implements exponential backoff strategy.
-    """
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
