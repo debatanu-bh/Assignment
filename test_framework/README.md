@@ -86,7 +86,7 @@ BLOCK DIAGRAM OF THE AUTOMATION
      
   2) Firmware Update Timing
      - After flashing new firmware, the device needs time to boot and become reachable.
-     - Mitigation: CI/CD should include a health-check wait step before running tests (e.g. poll GET /api/device/name until 200).
+     - Mitigation: CI/CD should include a health-check wait step before running tests ( loop GET /api/device/name until 200 is received).
      
   3) Cloud Deployment Propagation
      - Newly deployed cloud services may take time to become fully available.
@@ -103,6 +103,10 @@ BLOCK DIAGRAM OF THE AUTOMATION
   6) Security
      - Credentials must never be committed to version control.
      - Mitigation: .env is gitignored; CI/CD injects secrets via environment variables.
+     
+  7) Device Access
+     - SSH access is allowed for test devices but not for production devices.
+     - Mitigation: Production devices use a reverse proxy mechanism to connect and update firmware.
 ---
   
   TEST CASES 
