@@ -1,3 +1,69 @@
+Test Automation High-Level Design
+# 1. High-Level Design
+
+### 1.1 Layered Architecture
+
+The framework is built in **four layers**, each with a single responsibility:
+
+```
+Tests  →  Services  →  Clients  →  REST APIs (Cloud / Device)
+```
+
+| Layer | Files | Responsibility |
+|---|---|---|
+| **Test** | `test_cloud_*.py`, `test_device_*.py` | Test logic, assertions, parametrization |
+| **Service** | `DeviceService`, `AuthService` | Business workflows (set name → verify on device) |
+| **Client** | `CloudAPIClient`, `DeviceAPIClient` | Raw HTTP calls to specific endpoints |
+| **Infrastructure** | `BaseAPIClient`, `retry_decorator`, `settings` | Retry logic, config, logging |
+
+**Why layers?** A test never constructs a URL or manages a token directly. If an API endpoint changes, only the client layer changes — tests don't need updating.
+
+### 1.2 Key Design Decisions
+
+**a) Two separate clients, one base class**
+- The cloud and device have different base URLs and different APIs, so they get separate clients.
+- Common behavior (headers, retry, timeout) lives in `BaseAPIClient` using the **Template Method** pattern — subclasses only override `get_base_url()`.
+
+**b) AuthService as a Singleton with token caching**
+- Authentication is expensive (network call). The singleton caches tokens so 50 tests share one login instead of logging in 50 times.
+- `force_refresh` parameter handles token expiry mid-run.
+
+**c) Facade pattern (DeviceService)**
+- Tests call `change_device_name_via_cloud("name")` — one line. Under the hood it authenticates, validates input via Pydantic, calls the cloud API, and structures the response. This keeps tests clean and readable.
+
+**d) Configuration externalized to `.env`**
+- URLs, credentials, timeouts all come from `.env` (never hardcoded).
+- Same codebase runs against different environments by swapping the `.env` file.
+- CI/CD injects values via environment variables.
+
+**e) Retry with exponential backoff**
+- Every HTTP call is wrapped with `@retry(max_attempts=3, backoff=2)`.
+- This handles transient network issues — critical for IoT devices on potentially unreliable networks.
+
+### 1.3 Two Test Modes
+
+| Mode | Command | What happens |
+|---|---|---|
+| **Mocked** (default) | `pytest tests/` | All HTTP calls mocked via `pytest-mock`. Fast, deterministic, no hardware needed. |
+| **Real** (CI/CD nightly) | `pytest tests/ --real` | Tests marked `@pytest.mark.real` hit the actual cloud + device. |
+
+Developers can run the full suite locally in <1 second, while the nightly CI/CD validates against real hardware.
+
+### 1.4 CI/CD Integration
+
+The nightly pipeline runs 5 steps in sequence:
+
+```
+Build Firmware → Flash Device (192.168.0.2) → Build Cloud → Deploy Cloud → Run Tests
+```
+
+The test workstation just needs:
+- Network access to the device (LAN) and cloud (HTTPS)
+- A `.env` with the right URLs and credentials
+- `pytest tests/ --real --alluredir=allure-results`
+
+
+
 ![alt text](block_diagram.png)
 
 This is the architecture of the framework
@@ -46,3 +112,39 @@ KEY DESIGN DECISIONS
   6) Security
      - Credentials must never be committed to version control.
      - Mitigation: .env is gitignored; CI/CD injects secrets via environment variables.
+     
+.  TEST CASES (10 total)
+================================================================================
+
+  Cloud API — Set Device Name (POST /api/device/name)
+  ───────────────────────────────────────────────────
+  TC_CLOUD_01  Set valid name        → 200, device reports new name
+  TC_CLOUD_02  Empty string          → Validation error (rejected)
+  TC_CLOUD_03  100-char name (max)   → 200, accepted
+  TC_CLOUD_04  101-char name         → Validation error (rejected)
+  TC_CLOUD_05  Special / Unicode     → 200, name preserved exactly
+  TC_CLOUD_06  Invalid/expired token → 401 UNAUTHORIZED
+  TC_CLOUD_07  Whitespace-only name  → Validation error (rejected)
+
+  Device API — Get Device Name (GET /api/device/name)
+  ───────────────────────────────────────────────────
+  TC_DEVICE_01  Get name after cloud change  → Returns updated name
+  TC_DEVICE_02  Get default name             → Non-empty string
+  TC_DEVICE_03  Invalid token                → 401 UNAUTHORIZED
+  TC_DEVICE_04  Name persists after reboot   → Same name returned
+  TC_DEVICE_05  Concurrent reads             → All return same name
+     
+  HOW TO RUN
+================================================================================
+  # Setup
+  cp .env.example .env          # edit with real credentials
+  pip install -r requirements.txt
+
+  # Run with mocks (no hardware needed)
+  pytest tests/ -v
+
+  # Run against real hardware (nightly CI/CD)
+  pytest tests/ --real -v --alluredir=allure-results
+
+  # Generate Allure report
+  allure serve allure-results
