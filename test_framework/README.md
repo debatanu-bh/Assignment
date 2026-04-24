@@ -138,11 +138,14 @@ BLOCK DIAGRAM OF THE AUTOMATION
   HOW TO RUN
 ================================================================================
   # Setup
-  After cloning the repo cd to test_framework 
-  cp .env.example .env          # edit with real credentials
-  python3 -m .venv venv		# if you want to run in virtual mode
-  source .venv/bin/activate     # activate the virtual  environment
-  pip install -r requirements.txt
+
+After cloning the repo, `cd` into `test_framework`:
+
+```bash
+	cp .env.example .env          # edit with real credentials
+	python3 -m venv .venv         # create virtual environment
+	source .venv/bin/activate     # activate virtual environment
+	pip install -r requirements.txt
 
   # Run with mocks (no hardware needed)
   pytest tests/ -v
