@@ -17,3 +17,4 @@ services:
       - ./allure-results:/app/allure-results
     environment:
       CHECK_RESULTS_EVERY_SECONDS: 5
+      KEEP_HISTORY: 1

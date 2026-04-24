@@ -186,6 +186,6 @@ docker compose run --rm tests tests/test_cloud_device_name.py -v
 # Run real integration tests (requires .env with valid credentials)
 docker compose run --rm tests tests/ --real -v
 
-# View Allure report at http://localhost:5050
+# View Allure report at http://localhost:5050 or http://localhost:5050/allure-docker-service/latest-report
 docker compose up allure
 ```
