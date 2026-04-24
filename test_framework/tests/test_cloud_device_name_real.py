@@ -12,6 +12,7 @@ class TestCloudDeviceNameReal:
         AuthService._cloud_token = None
         AuthService._device_token = None
 
+    # TC_REAL_CLOUD_01: Set name via cloud, verify on device
     def test_set_and_verify_device_name(self):
         new_name = "Integration Test Camera"
 
@@ -20,7 +21,8 @@ class TestCloudDeviceNameReal:
 
         # Read back from device
         assert self.device_service.verify_device_name_on_device(new_name)
-
+  
+    # TC_REAL_CLOUD_02: Update name twice
     def test_update_device_name_twice(self):
         first_name = "First Name"
         second_name = "Second Name"
@@ -30,7 +32,8 @@ class TestCloudDeviceNameReal:
 
         device_name = self.device_service.get_device_name_from_device()
         assert device_name == second_name
-
+    
+    # TC_REAL_CLOUD_03: Special characters round-trip
     def test_special_characters_round_trip(self):
         special_name = "Camera #1 — 温度センサー"
 
