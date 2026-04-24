@@ -23,25 +23,26 @@ KEY DESIGN DECISIONS
 
  CONSIDERATIONS & POTENTIAL PITFALLS
 ================================================================================
-  a) Network Reliability
+  1) Network Reliability
      - The device is on a local network (192.168.0.2). Flaky Wi-Fi or network partitions can cause intermittent test failures.
      - Mitigation: Retry decorator with exponential backoff, configurable timeout via .env.
      
-  b) Firmware Update Timing
+  2) Firmware Update Timing
      - After flashing new firmware, the device needs time to boot and become reachable.
      - Mitigation: CI/CD should include a health-check wait step before running tests (e.g. poll GET /api/device/name until 200).
      
-  c) Cloud Deployment Propagation
+  3) Cloud Deployment Propagation
      - Newly deployed cloud services may take time to become fully available.
      - Mitigation: same health-check polling approach.
      
-  d) Test Isolation
+  4) Test Isolation
      - The device name is shared state. Tests that modify it can interfere with each other if run in parallel.
      - Mitigation: tests reset state in setup/teardown, avoid pytest-xdist parallelism for integration tests against real hardware.
      
-  e) Token Expiry
+  5) Token Expiry
      - If the test suite takes a long time, tokens may expire mid-run.
      - Mitigation: AuthService supports force_refresh; tests can catch 401 and re-authenticate.
-  f) Security
+     
+  6) Security
      - Credentials must never be committed to version control.
      - Mitigation: .env is gitignored; CI/CD injects secrets via environment variables.
