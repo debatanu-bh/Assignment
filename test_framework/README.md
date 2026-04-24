@@ -151,4 +151,6 @@ KEY DESIGN DECISIONS
   pytest tests/ --real -v --alluredir=allure-results
 
   # Generate Allure report
-  allure serve allure-results
+  allure serve allure-results 
+        or
+  npx allure serve allure-results
