@@ -172,5 +172,20 @@ After cloning the repo, `cd` into `test_framework`:
   allure serve allure-results 
         or
   npx allure serve allure-results
-  
-  ---
+```
+
+## Docker
+
+```bash
+# Run mocked tests
+docker compose run --rm tests
+
+# Run a specific test file
+docker compose run --rm tests tests/test_cloud_device_name.py -v
+
+# Run real integration tests (requires .env with valid credentials)
+docker compose run --rm tests tests/ --real -v
+
+# View Allure report at http://localhost:5050
+docker compose up allure
+```

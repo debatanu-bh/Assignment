@@ -1,0 +1,19 @@
+services:
+  tests:
+    build: .
+    env_file: .env
+    volumes:
+      - ./allure-results:/app/allure-results
+    # Override CMD to run specific test suites:
+    #   docker compose run tests tests/test_cloud_device_name.py -v
+    # For real device/cloud tests:
+    #   docker compose run tests tests/ --real -v
+
+  allure:
+    image: frankescobar/allure-docker-service:latest
+    ports:
+      - "5050:5050"
+    volumes:
+      - ./allure-results:/app/allure-results
+    environment:
+      CHECK_RESULTS_EVERY_SECONDS: 5
