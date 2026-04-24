@@ -108,7 +108,12 @@ BLOCK DIAGRAM OF THE AUTOMATION
      - SSH access is allowed for test devices but not for production devices.
      - Mitigation: Production devices use a reverse proxy mechanism to connect and update firmware.
 ---
-  
+Define 10 Test Cases:
+Propose five different test cases for testing the system. You do not need to include dedicated tests
+for the login functions (however, you should use the Login APIs for authentication).
+The test cases should cover various scenarios for the Get Device Name and Set Device Name
+functionalities.  
+---  
   TEST CASES 
 ================================================================================
 
