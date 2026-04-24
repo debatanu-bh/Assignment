@@ -40,12 +40,12 @@ Tests  →  Services  →  Clients  →  REST APIs (Cloud / Device)
 - This handles transient network issues — critical for IoT devices on potentially unreliable networks.
 - Network calls are wrapped with a @retry decorator (utils/retry_decorator.py)to handle transient failures — critical for IoT devices on unreliable networks.
 
-**f) Mocked Unit Tests + Real Integration Tests **
-     - Default test run: all API calls are mocked (pytest-mock) so tests are fast, deterministic, and runnable without hardware.
-     - CI/CD nightly run: tests marked @pytest.mark.real can be executed with --real flag against the actual device (192.168.0.2) and cloud(https://automation.ienso.com) after firmware/cloud deployment.
+**f) Mocked Unit Tests + Real Integration Tests**
+- Default test run: all API calls are mocked (pytest-mock) so tests are fast, deterministic, and runnable without hardware.
+- CI/CD nightly run: tests marked @pytest.mark.real can be executed with --real flag against the actual device (192.168.0.2) and cloud(https://automation.ienso.com) after firmware/cloud deployment.
 
 **g) Allure Reporting **
-     - pytest --alluredir=allure-results generates reports for the nightly CI/CD pipeline.
+- pytest --alluredir=allure-results generates reports for the nightly CI/CD pipeline.
 
 ### 1.3 Two Test Modes
 
@@ -68,17 +68,15 @@ The test workstation just needs:
 - Network access to the device (LAN) and cloud (HTTPS)
 - A `.env` with the right URLs and credentials
 - `pytest tests/ --real --alluredir=allure-results`
-
-
-
-![alt text](block_diagram.png)
-
-This is the architecture of the framework
-
-
-KEY DESIGN DECISIONS
+---
+BLOCK DIAGRAM OF THE AUTOMATION 
 ===============================================================================
   
+![alt text](block_diagram.png)
+
+
+---
+
 
  CONSIDERATIONS & POTENTIAL PITFALLS
 ================================================================================
@@ -105,8 +103,9 @@ KEY DESIGN DECISIONS
   6) Security
      - Credentials must never be committed to version control.
      - Mitigation: .env is gitignored; CI/CD injects secrets via environment variables.
-     
-.  TEST CASES 
+---
+  
+  TEST CASES 
 ================================================================================
 
   Cloud API — Set Device Name (POST /api/device/name)
