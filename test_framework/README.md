@@ -1,3 +1,7 @@
+1. Test Automation High-Level Design
+a. Description
+Describe, in high-level, how you would design the automation system, major consideration
+points, possible pitfalls, etc.
 # 1. High-Level Design
 
 ### 1.1 Layered Architecture
@@ -68,6 +72,12 @@ The test workstation just needs:
 - Network access to the device (LAN) and cloud (HTTPS)
 - A `.env` with the right URLs and credentials
 - `pytest tests/ --real --alluredir=allure-results`
+
+---
+
+Create a diagram showing the test automation solution block diagram.
+The diagram should illustrate how the test automation system interacts with the hardware
+device and the cloud service.
 ---
 BLOCK DIAGRAM OF THE AUTOMATION 
 ===============================================================================
